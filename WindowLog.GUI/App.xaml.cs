@@ -22,7 +22,11 @@ namespace WindowLog.GUI
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            logger = new WindowLogger();
+            logger = new FileLogger();
+            foreach (var entry in logger.Entries)
+            {
+                ViewModel.Entries.Add(new EntryModel(entry));
+            }
             worker = new BackgroundWorker
             {
                 WorkerReportsProgress = true,
@@ -31,9 +35,9 @@ namespace WindowLog.GUI
             worker.DoWork += (sender, args) =>
             {
                 while(true) {
+                    Thread.Sleep(100);
                     var changed = logger.Update();
                     worker.ReportProgress(0, changed);
-                    Thread.Sleep(100);
                     if (worker.CancellationPending)
                     {
                         break;
@@ -45,20 +49,17 @@ namespace WindowLog.GUI
                 var changed = true.Equals(args.UserState);
                 if (changed)
                 {
-                    if (ViewModel.Entries.Any())
+                    if (ViewModel.Current.Entry != null)
                     {
-                        ViewModel.Entries.OrderByDescending(x => x.Entry.Start).First().Entry.End = logger.Entries.OrderByDescending(x => x.Start).Skip(1).First().End;
+                        ViewModel.Current.Entry.End = logger.Current.Start;
+                        ViewModel.Current.NotifyChange();
                     }
-                    ViewModel.Entries.Add(new EntryModel{ Entry = logger.Current });
-                    ViewModel.Current = new EntryModel { Entry = logger.Current };
+
+                    var newModel = new EntryModel(logger.Current);
+                    ViewModel.Entries.Add(newModel);
+                    ViewModel.Current = newModel;
                 }
-                if (ViewModel.Entries.Any())
-                {
-                    foreach(var entry in ViewModel.Entries.OrderByDescending(x => x.Entry.Start).Take(3))
-                    {
-                        entry.NotifyChange();
-                    }
-                }
+                ViewModel.Current.NotifyChange();
             };
             worker.RunWorkerAsync();
 

@@ -12,11 +12,11 @@ public class ViewModel : INotifyPropertyChanged
 {
     public ObservableCollection<EntryModel> Entries { get; } = new ObservableCollection<EntryModel>();
 
-    private EntryModel current;
+    private EntryModel current = new EntryModel();
 
     public EntryModel Current
     {
-        get { return current; }
+        get => current;
         set
         {
             if (current != value)
@@ -34,8 +34,12 @@ public class ViewModel : INotifyPropertyChanged
 
     public string CurrentDescription
     {
-        get => Current == null ? "N/A" : "[" + Current.Entry.PID + "] " + Current.Entry.Title + "(" + Current.Entry.Executable.Substring(Math.Max(0,
-            Current.Entry.Executable.LastIndexOf("\\", StringComparison.CurrentCultureIgnoreCase))) + ")";
+        get
+        {
+            return Current.Entry == null
+                ? "N/A"
+                : Current.Entry.ToString();
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -48,9 +52,9 @@ public class ViewModel : INotifyPropertyChanged
 
 public class EntryModel : INotifyPropertyChanged
 {
-    private Entry entry;
+    private Entry? entry;
 
-    public Entry Entry
+    public Entry? Entry
     {
         get => entry;
         set
@@ -63,9 +67,23 @@ public class EntryModel : INotifyPropertyChanged
         }
     }
 
+    public DateTime? End => Entry?.End;
+    public TimeSpan? Duration => Entry?.Duration;
+
+    public EntryModel()
+    {
+    }
+
+    public EntryModel(Entry entry)
+    {
+        this.entry = entry;
+    }
+
     public void NotifyChange()
     {
         OnPropertyChanged(nameof(Entry));
+        OnPropertyChanged(nameof(End));
+        OnPropertyChanged(nameof(Duration));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

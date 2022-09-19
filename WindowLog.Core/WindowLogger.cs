@@ -14,18 +14,25 @@ namespace WindowLog.Core
         private List<Entry> entries = new List<Entry>();
         public IList<Entry> Entries => entries;
         public Entry Current => entries.Any() ? entries[^1] : new Entry();
+        public event EventHandler<Entry>? EntryComplete;
 
         public bool Update()
         {
             if (watcher.Update())
             {
+                var entryComplete = false;
                 lock (lockObj)
                 {
-                    Debug.WriteLine("Checking for PID " + watcher.PID + " entry count " + entries.Count);
-                    if (entries.Any())
+                    if (entries.Any() && entries[^1].End == null)
                     {
                         entries[^1].End = DateTime.Now;
+                        entryComplete = true;
                     }
+                }
+
+                if (entryComplete)
+                {
+                    EntryComplete?.Invoke(this, entries[^1]);
                 }
                 var entry = new Entry
                 {

@@ -3,21 +3,131 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:WindowLog.GUI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         DataContext="{x:Static local:App.ViewModel}">
+    <Window.Resources>
+        <CollectionViewSource x:Name="GridItems" Source="{Binding Entries}" x:Key="GridItems">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Entry.Start" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Name="AggregatedItems" Source="{Binding Entries}" x:Key="AggregatedItems">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Entry.Executable"/>
+                <PropertyGroupDescription PropertyName="Entry.Title"/>
+            </CollectionViewSource.GroupDescriptions>
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Executable" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <local:DurationTotalConverter x:Key="DurationConverter"/>
+    </Window.Resources>
     <Grid>
         <TextBlock Text="{Binding CurrentDescription}" Height="20" VerticalAlignment="Top"></TextBlock>
-        <DataGrid ItemsSource="{Binding Entries}" Margin="0,25,0,0" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending"></DataGridTextColumn>
-                <DataGridTextColumn Header="End" Binding="{Binding Path=Entry.End}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Duration" Binding="{Binding Path=Entry.Duration}"></DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <TabControl Margin="0, 20, 0, 0">
+            <TabItem Header="Full log">
+                <Grid>
+                    <DataGrid ItemsSource="{Binding Source={StaticResource GridItems}}" Margin="0,0,0,0" AutoGenerateColumns="False" CanUserAddRows="False" x:Name="FullLogGrid">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending"></DataGridTextColumn>
+                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" ></DataGridTextColumn>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}"></DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Aggregated">
+                <Grid>
+                    <DataGrid 
+                        ItemsSource="{Binding 
+                        Source={StaticResource AggregatedItems}}" 
+                        Margin="0,0,0,0" 
+                        AutoGenerateColumns="False" 
+                        CanUserAddRows="False" 
+                        x:Name="AggregatedLogGrid"
+                        >
+                        <DataGrid.GroupStyle>
+                            <!-- Style for groups at top level. -->
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="0,0,0,5"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Expander IsExpanded="True">
+                                                        <Expander.Header>
+                                                            <DockPanel>
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" Margin="0,0,5,0"/>
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" />
+                                                            </DockPanel>
+                                                        </Expander.Header>
+                                                        <Expander.Content>
+                                                            <ItemsPresenter />
+                                                        </Expander.Content>
+                                                    </Expander>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="30,0,0,5"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Expander IsExpanded="False">
+                                                        <Expander.Header>
+                                                            <DockPanel>
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" Margin="0,0,5,0"/>
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" />
+                                                            </DockPanel>
+                                                        </Expander.Header>
+                                                        <Expander.Content>
+                                                            <ItemsPresenter />
+                                                        </Expander.Content>
+                                                    </Expander>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                            <!-- Style for groups under the top level. -->
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <TextBlock Text="{Binding Path=Name}"/>
+                                            <TextBlock Text="{Binding Path=ItemCount}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </DataGrid.GroupStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending"></DataGridTextColumn>
+                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" ></DataGridTextColumn>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}"></DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
     </Grid>
 </Window>
