@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace WindowLog.Core
 {
     public class FileLogger : WindowLogger
     {
         private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
-        private readonly string logPath;
+        private string rootPath = "";
 
         public FileLogger()
         {
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var rootPath = Path.Combine(appDataPath, "WindowLog");
-            if (!Directory.Exists(rootPath))
-            {
-                Directory.CreateDirectory(rootPath);
-            }
-            var fileName = $"WindowLog-{DateTime.Now:yyyy-MM-dd}.log";
-            logPath = Path.Combine(rootPath, fileName);
+            EnsureRootDir();
+            LoadExistingEntries();
 
-            if (File.Exists(logPath))
+            EntryComplete += AppendEntry;
+        }
+
+        private void LoadExistingEntries()
+        {
+            if (File.Exists(LogPath))
             {
-                var lines = File.ReadAllLines(logPath);
+                var lines = File.ReadAllLines(LogPath);
                 foreach (var line in lines.Select(x => x.Split(';')))
                 {
                     Entries.Add(new Entry
@@ -38,8 +32,21 @@ namespace WindowLog.Core
                     });
                 }
             }
+        }
 
-            EntryComplete += AppendEntry;
+        private string RootPath =>
+            rootPath == ""
+                ? rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WindowLog")
+                : rootPath;
+
+        private string LogPath => Path.Combine(RootPath, $"WindowLog-{DateTime.Now:yyyy-MM-dd}.log");
+
+        private void EnsureRootDir()
+        {
+            if (!Directory.Exists(RootPath))
+            {
+                Directory.CreateDirectory(RootPath);
+            }
         }
 
         private void AppendEntry(object? sender, Entry e)
@@ -47,7 +54,7 @@ namespace WindowLog.Core
             try
             {
                 File.AppendAllText(
-                    logPath,
+                    LogPath,
                     String.Join(
                         ";",
                         e.PID,

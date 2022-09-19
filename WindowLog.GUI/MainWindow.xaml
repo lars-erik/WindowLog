@@ -6,7 +6,7 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:WindowLog.GUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="Window Logger" Height="450" Width="800"
         DataContext="{x:Static local:App.ViewModel}">
     <Window.Resources>
         <CollectionViewSource x:Name="GridItems" Source="{Binding Entries}" x:Key="GridItems">
@@ -35,8 +35,8 @@
                             <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}" IsReadOnly="True"></DataGridTextColumn>
                             <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}" IsReadOnly="True"></DataGridTextColumn>
                             <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}" IsReadOnly="True"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending" IsReadOnly="True"></DataGridTextColumn>
-                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" IsReadOnly="True" ></DataGridTextColumn>
+                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start, StringFormat={}{0:g}}" SortDirection="Descending" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="End" Binding="{Binding Path=End, StringFormat={}{0:g}}" IsReadOnly="True" ></DataGridTextColumn>
                             <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" IsReadOnly="True"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
@@ -66,7 +66,15 @@
                                                             <DockPanel>
                                                                 <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,5,0" />
                                                                 <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" Margin="0,0,5,0"/>
-                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" />
+                                                                <TextBlock FontWeight="Bold">
+                                                                    <TextBlock.Text>
+                                                                        <!-- Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" -->
+                                                                        <MultiBinding Converter="{StaticResource DurationConverter}" StringFormat="{}{1:d\\.hh\\:mm\\:ss}">
+                                                                            <Binding Path="Items.Count"></Binding>
+                                                                            <Binding Path="Items"></Binding>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
                                                             </DockPanel>
                                                         </Expander.Header>
                                                         <Expander.Content>
@@ -91,7 +99,15 @@
                                                             <DockPanel>
                                                                 <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,5,0" />
                                                                 <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" Margin="0,0,5,0"/>
-                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" />
+                                                                <TextBlock FontWeight="Bold">
+                                                                    <TextBlock.Text>
+                                                                        <!-- Text="{Binding Path=Items, Converter={StaticResource DurationConverter}, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" -->
+                                                                        <MultiBinding Converter="{StaticResource DurationConverter}" >
+                                                                            <Binding Path="Items.Count"></Binding>
+                                                                            <Binding Path="Items"></Binding>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
                                                             </DockPanel>
                                                         </Expander.Header>
                                                         <Expander.Content>

@@ -9,29 +9,42 @@ using System.Windows.Data;
 
 namespace WindowLog.GUI
 {
-    public class DurationTotalConverter : IValueConverter
+    public class DurationTotalConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is ICollection<object> coll)
-            {
-                if (coll.FirstOrDefault() is EntryModel)
-                {
-                    return coll.Cast<EntryModel>().Aggregate(TimeSpan.Zero, (c, e) => c + (e.Duration ?? TimeSpan.Zero));
-                }
+        private const string FormatString = @"d\.hh\:mm\:ss";
+        private static readonly string Blank = TimeSpan.Zero.ToString(FormatString);
 
-                if (coll.FirstOrDefault() is CollectionViewGroup)
+        public object Convert(object[] value, Type targetType, object parameter, CultureInfo culture)
+        {
+            try
+            {
+                if (value[1] is ICollection<object> coll)
                 {
-                    return coll.Cast<CollectionViewGroup>().Aggregate(TimeSpan.Zero, (span, item) => span + (TimeSpan)Convert(item.Items, targetType, parameter, culture));
+                    if (coll.FirstOrDefault() is EntryModel)
+                    {
+                        var retVal = coll.Cast<EntryModel>()
+                            .Aggregate(TimeSpan.Zero, (c, e) => c + (e.Duration ?? TimeSpan.Zero));
+                        return retVal.ToString(FormatString);
+                    }
+
+                    if (coll.FirstOrDefault() is CollectionViewGroup)
+                    {
+                        var retVal = coll.Cast<CollectionViewGroup>().Aggregate(TimeSpan.Zero,
+                            (span, item) => span + item.Items.Cast<EntryModel>().Aggregate(TimeSpan.Zero, (c, e) => c + (e.Duration ?? TimeSpan.Zero)));
+                        return retVal.ToString(FormatString);
+                    }
                 }
             }
-
-            return TimeSpan.Zero;
+            catch
+            {
+                throw;
+            }
+            return Blank;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
         {
-            return value;
+            return new []{ value };
         }
     }
 }
