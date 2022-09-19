@@ -20,7 +20,7 @@
                 <PropertyGroupDescription PropertyName="Entry.Title"/>
             </CollectionViewSource.GroupDescriptions>
             <CollectionViewSource.SortDescriptions>
-                <scm:SortDescription PropertyName="Executable" Direction="Ascending"/>
+                <scm:SortDescription PropertyName="Entry.Executable" Direction="Ascending"/>
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
         <local:DurationTotalConverter x:Key="DurationConverter"/>
@@ -32,12 +32,12 @@
                 <Grid>
                     <DataGrid ItemsSource="{Binding Source={StaticResource GridItems}}" Margin="0,0,0,0" AutoGenerateColumns="False" CanUserAddRows="False" x:Name="FullLogGrid">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending"></DataGridTextColumn>
-                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" ></DataGridTextColumn>
-                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" IsReadOnly="True" ></DataGridTextColumn>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" IsReadOnly="True"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -117,12 +117,12 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}"></DataGridTextColumn>
-                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" SortDirection="Descending"></DataGridTextColumn>
-                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" ></DataGridTextColumn>
-                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}"></DataGridTextColumn>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Path=Entry.PID}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Executable" Binding="{Binding Path=Entry.Executable}" SortDirection="Ascending" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Title" Binding="{Binding Path=Entry.Title}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="Start" Binding="{Binding Path=Entry.Start}" IsReadOnly="True"></DataGridTextColumn>
+                            <DataGridTextColumn Header="End" Binding="{Binding Path=End}" IsReadOnly="True" ></DataGridTextColumn>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Path=Duration, StringFormat={}{0:d\\.hh\\:mm\\:ss}}" IsReadOnly="True"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
